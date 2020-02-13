@@ -39,6 +39,8 @@ func Guess(hint string) Shell {
 		return Fish
 	case "zsh":
 		return Zsh
+	case "powershell":
+		return PowerShell
 	default:
 		return Bash
 	}
