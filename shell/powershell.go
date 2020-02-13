@@ -21,16 +21,21 @@ var PowerShell = Shell(`# Put the line below in ~\Documents\WindowsPowerShell\pr
 #   jump hint $term
 # }
 
-# TODO unhardcode paths
+# Performs the jump to the specified search $Terms.
 #
 function {{.Bind}} {
   [CmdletBinding()]
   param (
-    [Parameter(Mandatory=$True, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
-    [string]
-    $path
+    [Parameter(
+      Mandatory=$True,
+      ValueFromPipeline=$True,
+      ValueFromPipelineByPropertyName=$True,
+      ValueFromRemainingArguments=$true
+    )]
+    [String[]]
+    $Terms
   )
-  $dir = jump.exe cd $path
+  $dir = jump.exe cd $Terms
   if (Test-Path $dir -PathType Container) {
     Set-Location $dir
   }
