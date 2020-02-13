@@ -27,7 +27,7 @@ function {{.Bind}} {
   [CmdletBinding()]
   param (
     [Parameter(
-      Mandatory=$True,
+      Mandatory=$False,
       ValueFromPipeline=$True,
       ValueFromPipelineByPropertyName=$True,
       ValueFromRemainingArguments=$true
