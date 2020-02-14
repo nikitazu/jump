@@ -14,12 +14,26 @@ var PowerShell = Shell(`# Put the line below in ~\Documents\WindowsPowerShell\pr
 #   jump chdir && return $status
 # }
 
-# TODO: provide PowerShell command
+# Completes current jump command
+#   returns true if current prompt starts with jump command
+#       and false if not
 #
-# __jump_hint() {
-#   local term="${COMP_LINE/#{{.Bind}} /}"
-#   jump hint $term
-# }
+function __jump_hint {
+  [CmdletBinding()]
+  param (
+    [Parameter(Mandatory=$True)]
+    [String]
+    $Line
+  )
+  $jumpCommand = "{{.Bind}} "
+  $isJumping = $Line.StartsWith($jumpCommand)
+  if ($isJumping) {
+    $terms = $Line.Substring(2)
+    $hint = jump hint $terms
+    [Microsoft.PowerShell.PSConsoleReadLine]::Replace($jumpCommand.Length, ($Line.Length - $jumpCommand.Length), $hint)
+  }
+  return $isJumping
+}
 
 # Performs the jump to the specified search $Terms.
 #
@@ -47,7 +61,26 @@ function {{.Bind}} {
 #   PROMPT_COMMAND="__jump_prompt_command;$PROMPT_COMMAND"
 # }
 
-# TODO: provide PowerShell command
+# Hook into auto-completion to support jump
 #
-# complete -o dirnames -C '__jump_hint' {{.Bind}}
+$parameters = @{
+  Key = 'Tab'
+  BriefDescription = 'JumpAutoComplete'
+  LongDescription = 'Auto-completes with support for Jump command.'
+  ScriptBlock = {
+    param($key, $arg)
+
+    $line = $null
+    $cursor = $null
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState(
+      [ref]$line,
+      [ref]$cursor
+    )
+
+    if ($line -And -Not (__jump_hint($line)) ) {
+      [Microsoft.PowerShell.PSConsoleReadLine]::TabCompleteNext($key, $line);
+    }
+  }
+}
+Set-PSReadLineKeyHandler @parameters
 `)
